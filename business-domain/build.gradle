@@ -1,0 +1,56 @@
+subprojects {
+    apply plugin: 'groovy'
+    apply plugin: 'com.diffplug.spotless'
+    apply plugin: 'io.spring.dependency-management'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        implementation 'com.google.guava:guava:31.1-jre'
+
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        }
+        testImplementation "org.codehaus.groovy:groovy-all:${groovyVersion}"
+        testImplementation "org.spockframework:spock-core:${spockVersion}"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    spotless {
+        format "misc", {
+            target "*.gradle", "*.md", "gitignore"
+
+            trimTrailingWhitespace()
+            indentWithSpaces(2)
+            endWithNewline()
+        }
+        java {
+            importOrder()
+            removeUnusedImports()
+            indentWithSpaces(2)
+            googleJavaFormat()
+        }
+        groovy {
+            importOrder()
+            excludeJava()
+            trimTrailingWhitespace()
+            indentWithSpaces(2)
+            endWithNewline()
+        }
+    }
+}

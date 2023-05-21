@@ -1,0 +1,53 @@
+buildscript {
+    ext {
+        springBootVersion = "3.1.0"
+        springCloudVersion = "2022.0.2"
+        openApiVersion = "2.1.0"
+        lombokVersion = "1.8.24"
+        spotlessVersion = "6.18.0"
+
+        groovyVersion = "3.0.10"
+        spockVersion = "2.3-groovy-3.0"
+        junitJupiterVersion = "5.9.1"
+
+        dependencyManagementVersion = "1.0.15.RELEASE"
+    }
+
+    dependencies {
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:$spotlessVersion"
+    }
+
+    repositories {
+        mavenCentral()
+     }
+}
+
+plugins {
+    id 'groovy'
+    id 'org.springframework.boot' version "$springBootVersion" apply false
+    id 'com.diffplug.spotless' version "$spotlessVersion"
+    id 'io.spring.dependency-management' version "$dependencyManagementVersion"
+
+    id 'idea'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+allprojects {
+    repositories {
+        project.rootProject.buildscript.repositories.each {add(it)}
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
+    }
+}
+
+jar {
+    enabled = false
+}

@@ -1,0 +1,97 @@
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'com.diffplug.spotless'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'application'
+
+ext {
+    javaMainClass = "com.tenetmind.translatorchat.Application"
+}
+
+application {
+    mainClassName = javaMainClass
+}
+
+group = 'com.tenetmind'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    implementation project(':business-domain:chat')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    testImplementation "org.spockframework:spock-core:${spockVersion}"
+    testImplementation "org.spockframework:spock-spring:${spockVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+spotless {
+    format "misc", {
+        target "*.gradle", "*.md", "gitignore"
+
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+    java {
+        importOrder()
+        removeUnusedImports()
+        indentWithSpaces(2)
+        googleJavaFormat()
+    }
+    groovy {
+        importOrder()
+        excludeJava()
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+}
+
+jar {
+    enabled = false
+    archiveClassifier = ''
+}
+
+bootJar {
+    manifest {
+        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
+        attributes 'Start-Class': javaMainClass
+        attributes 'Implementation-Version': "${System.env.APP_VERSION}" ?: "unknown"
+    }
+}

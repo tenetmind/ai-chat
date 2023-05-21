@@ -1,0 +1,6 @@
+rootProject.name = 'translator-chat'
+
+include 'app-infrastructure'
+
+include 'business-domain'
+include 'business-domain:chat'

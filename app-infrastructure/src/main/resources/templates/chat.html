@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chat App</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 5px;
+            box-sizing: border-box;
+            background-color: #333; /* Dark gray background */
+        }
+
+        #inputField {
+            position: fixed;
+            bottom: 20px;
+            width: 35%;
+            min-height: 18px;
+            max-height: 400px;
+            overflow: hidden;
+            font-size: 14px;
+            resize: none;
+            line-height: 25px;
+            background-color: #eeeeee;
+            border-radius: 10px; /* Add rounded corners */
+            padding: 5px 15px;
+        }
+
+        #inputField::placeholder {
+            color: #888;
+            font-style: italic;
+        }
+
+        #chatHistory {
+            height: calc(100% - 100px);
+            overflow-y: auto;
+            width: 35%;
+            position: fixed;
+            bottom: 90px;
+            font-size: 16px;
+            font-family: sans-serif;
+            line-height: 1.4;
+            background-color: #d3d3d3;
+            border-radius: 10px; /* Add rounded corners */
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        #chatHistory div {
+            padding: 10px 0; /* Add padding to the top and bottom of each message */
+        }
+
+        .user-message {
+            color: black;
+        }
+
+        .machine-message {
+            color: #444;
+        }
+
+        .dot-1, .dot-2, .dot-3 {
+            animation: loading 1.5s infinite;
+            opacity: 0;
+        }
+
+        .dot-1 {
+            animation-delay: 0.2s;
+        }
+
+        .dot-2 {
+            animation-delay: 0.4s;
+        }
+
+        .dot-3 {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes loading {
+            0% {
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .error-message {
+            font-style: italic;
+            color: #888;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        let currentLoadingMessage = null;
+        let currentAjaxRequest = null;
+
+        $(function () {
+            // Set focus to the input field when the page loads
+            $('#inputField').focus();
+
+            $('#inputField').on('keydown input', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    let message = $(this).val();
+
+                    // Cancel the previous AJAX request, if any
+                    if (currentAjaxRequest) {
+                        currentAjaxRequest.abort();
+                    }
+
+                    // Remove the previous loading message, if any
+                    if (currentLoadingMessage) {
+                        currentLoadingMessage.remove();
+                    }
+
+                    $('#chatHistory').append('<div><span class="user-message">' + message + '</span></div>');
+                    $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+
+                    currentLoadingMessage = $('<div><span class="machine-message"><span class="dot-1">.</span><span class="dot-2">.</span><span class="dot-3">.</span></span></div>');
+                    $('#chatHistory').append(currentLoadingMessage);
+
+                    $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+
+                    currentAjaxRequest = $.ajax({
+                        url: '/chat/message',
+                        type: 'POST',
+                        data: JSON.stringify({'message': message}),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (currentLoadingMessage) {
+                                let formattedMessage = data.message.replace(/\n/g, '<br>');
+                                currentLoadingMessage.html('<span class="machine-message">' + formattedMessage + '</span>');
+                                $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+                                currentLoadingMessage = null;
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            if (currentLoadingMessage) {
+                                currentLoadingMessage.replaceWith('<div><span class="error-message">Oops! Something weird happened, sorry...</span></div>');
+                                $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+                                currentLoadingMessage = null;
+                            }
+                        }
+                    }).always(function () {
+                        currentAjaxRequest = null;
+                    });
+
+                    $(this).val('');
+                    $(this).attr('placeholder', '');
+                    $(this).css('height', '40px');
+                } else {
+                    $(this).css('height', 'auto');
+                    $(this).height(this.scrollHeight);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="chatHistory">
+    <!-- Chat history will be dynamically added here -->
+</div>
+<textarea id="inputField" placeholder="Start chatting here"></textarea>
+</body>
+</html>
