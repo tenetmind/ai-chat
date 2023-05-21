@@ -5,7 +5,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'application'
 
 ext {
-    javaMainClass = "com.tenetmind.translatorchat.Application"
+    javaMainClass = "com.tenetmind.app.Application"
 }
 
 application {
