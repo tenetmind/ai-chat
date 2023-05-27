@@ -124,6 +124,9 @@
         let currentAjaxRequest = null;
 
         $(function () {
+            const ERROR_TOO_MANY_REQUESTS = 'Too many requests. Please try again later.';
+            const ERROR_GENERIC = 'Oops! Something weird happened, sorry...';
+
             // Set focus to the input field when the page loads
             $('#inputField').focus();
 
@@ -164,8 +167,15 @@
                             }
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
-                            if (currentLoadingMessage) {
-                                currentLoadingMessage.replaceWith('<div><span class="error-message">Oops! Something weird happened, sorry...</span></div>');
+                            if (jqXHR.status === 429) {
+                                // Handle the 429 error separately
+                                if (currentLoadingMessage) {
+                                    currentLoadingMessage.replaceWith('<div><span class="error-message">' + ERROR_TOO_MANY_REQUESTS + '</span></div>');
+                                    scrollToBottom();
+                                    currentLoadingMessage = null;
+                                }
+                            } else if (currentLoadingMessage) {
+                                currentLoadingMessage.replaceWith('<div><span class="error-message">' + ERROR_GENERIC + '</span></div>');
                                 scrollToBottom();
                                 currentLoadingMessage = null;
                             }
