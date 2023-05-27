@@ -39,6 +39,11 @@
         }
 
         #chatHistory {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-start;
+            overflow: auto;
             position: fixed;
             bottom: 90px;
             height: calc(100% - 100px);
@@ -46,7 +51,7 @@
             max-width: 500px;
             left: 50%; /* Centralize */
             transform: translateX(-50%); /* Centralize */
-            overflow-y: auto;
+            /*overflow-y: auto;*/
             font-size: 16px;
             font-family: sans-serif;
             line-height: 1.4;
@@ -133,12 +138,11 @@
                     }
 
                     $('#chatHistory').append('<div><span class="user-message">' + message + '</span></div>');
-                    $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+                    scrollToBottom();
 
                     currentLoadingMessage = $('<div><span class="machine-message"><span class="dot-1">.</span><span class="dot-2">.</span><span class="dot-3">.</span></span></div>');
                     $('#chatHistory').append(currentLoadingMessage);
-
-                    $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+                    scrollToBottom();
 
                     currentAjaxRequest = $.ajax({
                         url: '/chat/message',
@@ -150,14 +154,14 @@
                             if (currentLoadingMessage) {
                                 let formattedMessage = data.message.replace(/\n/g, '<br>');
                                 currentLoadingMessage.html('<span class="machine-message">' + formattedMessage + '</span>');
-                                $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+                                scrollToBottom();
                                 currentLoadingMessage = null;
                             }
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             if (currentLoadingMessage) {
                                 currentLoadingMessage.replaceWith('<div><span class="error-message">Oops! Something weird happened, sorry...</span></div>');
-                                $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
+                                scrollToBottom();
                                 currentLoadingMessage = null;
                             }
                         }
@@ -173,6 +177,10 @@
                     $(this).height(this.scrollHeight);
                 }
             });
+
+            function scrollToBottom() {
+                $('#chatHistory').scrollTop(0);
+            }
         });
     </script>
 </head>
