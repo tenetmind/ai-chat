@@ -3,7 +3,8 @@
 <head>
     <title>Chat App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style id="dynamicStyles">
         body {
             display: flex;
             flex-direction: column;
@@ -117,11 +118,66 @@
             font-style: italic;
             color: #888;
         }
+
+        #settingsContainer {
+            position: fixed;
+            bottom: 90px;
+            right: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            width: 200px;
+            z-index: 9999; /* Ensure the settings container is always at the front */
+        }
+
+        #settingsContainer hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 10px 0;
+        }
+
+        #settingsContainer button {
+            display: block;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        #settingsContainer .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        #settingsContainer .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;  /* Adjusted width */
+            height: 25px;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        #settingsContainer .slider::-moz-range-thumb {
+            width: 15px;  /* Adjusted width */
+            height: 25px;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         let currentLoadingMessage = null;
         let currentAjaxRequest = null;
+        let currentModel = '1';
+        let currentCreativity = '0.5';
 
         $(function () {
             const ERROR_TOO_MANY_REQUESTS = 'Sorry, the AI appears to be busy with many requests. Please try again, or change the model.';
@@ -155,7 +211,11 @@
                     currentAjaxRequest = $.ajax({
                         url: '/chat/message',
                         type: 'POST',
-                        data: JSON.stringify({'message': message}),
+                        data: JSON.stringify({
+                            'message': message,
+                            'model': currentModel,
+                            'creativity': currentCreativity
+                        }),
                         contentType: 'application/json; charset=utf-8',
                         dataType: 'json',
                         success: function (data) {
@@ -196,13 +256,76 @@
             function scrollToBottom() {
                 $('#chatHistory').scrollTop(0);
             }
+
+            // Handle the settings icon click
+            $('#settingsIcon').click(function () {
+                // Create the settings dialog
+                let settingsDialog = `
+                    <div>
+                        <h4>Model</h4>
+                        <div>
+                            <input type="radio" id="model1" name="model" value="1" checked>
+                            <label for="model1">Model 1</label><br>
+                            <input type="radio" id="model2" name="model" value="2">
+                            <label for="model2">Model 2</label>
+                        </div>
+                        <hr>
+                        <h4>Creativity Level</h4>
+                        <div>
+                            <input type="range" min="0" max="1" value="${currentCreativity}" class="slider" id="creativity" step="0.05">
+                            <label for="creativity">0</label>
+                            <label for="creativity" style="float: right;">1</label>
+                        </div>
+                        <button id="selectButton">Select</button>
+                    </div>
+                `;
+
+                // Add the settings dialog to the container and show it
+                $('#settingsContainer').html(settingsDialog).show();
+
+                // Handle the select button click
+                $('#selectButton').click(function () {
+                    currentModel = $("input[name='model']:checked").val();
+                    currentCreativity = $('#creativity').val();
+                    $('#settingsContainer').hide();
+                });
+            });
         });
+
+        $(window).on('resize', function () {
+            updateSettingsIconPosition();
+        });
+
+        $(document).ready(function () {
+            updateSettingsIconPosition();
+        });
+
+        function updateSettingsIconPosition() {
+            let inputField = $("#inputField");
+            let settingsIcon = $("#settingsIcon");
+            let position = inputField.position();
+            let width = inputField.outerWidth();
+
+            let iconPosition = position.left + width - settingsIcon.outerWidth() - 15;
+
+            let newStyles = `
+            #settingsIcon {
+                left: ${iconPosition}px;
+            }
+        `;
+
+            $("#dynamicStyles").append(newStyles);
+        }
     </script>
 </head>
 <body>
+<div id="settingsContainer" style="display: none;">
+    <!-- Settings dialog will be dynamically added here -->
+</div>
 <div id="chatHistory">
     <!-- Chat history will be dynamically added here -->
 </div>
 <textarea id="inputField" placeholder="Start chatting here"></textarea>
+<i id="settingsIcon" class="material-icons" style="position: fixed; bottom: 50px; cursor: pointer;">more_vert</i>
 </body>
 </html>

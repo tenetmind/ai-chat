@@ -4,8 +4,11 @@ import static com.tenetmind.chat.port.out.GetChatResponsePort.ChatMessage;
 
 import com.tenetmind.chat.port.in.ChatWithAiUseCase;
 import com.tenetmind.chat.port.out.GetChatResponsePort;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -18,18 +21,36 @@ class ChatWithAiFacade implements ChatWithAiUseCase {
 
   private static final String SYSTEM_ROLE = "system";
   private static final String USER_ROLE = "user";
-  private static final String LLM_MODEL = "gpt-3.5-turbo-0301";
+  private static final String DEFAULT_MODEL = "gpt-3.5-turbo-0301";
+  private static final Map<String, String> modelMap = Map.of(
+      "1", "gpt-3.5-turbo-0301",
+      "2", "gpt-3.5-turbo"
+  );
   private final List<ChatMessage> messages = new ArrayList<>();
   private final GetChatResponsePort getChatResponsePort;
+  private String model = DEFAULT_MODEL;
+  private double creativity = 0.5;
 
   @Override
   public String chat(ChatCommand command) {
     var userMessage = buildUserMessage(command.getMessage());
+    var modelOpt = command.getModelOpt();
+    var creativityOpt = command.getCreativityOpt();
+
+    if (modelOpt.isPresent()) {
+      var modelId = modelOpt.get();
+      if (modelMap.containsKey(modelId)) {
+        model = modelMap.get(modelId);
+      }
+    }
+
+    creativityOpt.ifPresent(value -> creativity = Double.parseDouble(value));
+
     messages.add(userMessage);
     ChatMessage assistantMessage;
 
     try {
-      assistantMessage = getChatResponsePort.getResponse(LLM_MODEL, messages);
+      assistantMessage = getChatResponsePort.getResponse(model, messages, creativity);
     } catch (Exception e) {
       if (e.getMessage().contains("429")) {
         throw new TooManyRequestsException(e.getMessage());
@@ -46,5 +67,6 @@ class ChatWithAiFacade implements ChatWithAiUseCase {
     return new Message(USER_ROLE, content);
   }
 
-  private record Message(String role, String content) implements GetChatResponsePort.ChatMessage {}
+  private record Message(String role, String content) implements GetChatResponsePort.ChatMessage {
+  }
 }

@@ -5,9 +5,8 @@ import java.util.List;
 public interface GetChatResponsePort {
 
   Integer MAX_TOKENS = 2048;
-  Double TEMPERATURE = 0.;
 
-  ChatMessage getResponse(String model, List<? extends ChatMessage> chatMessages);
+  ChatMessage getResponse(String model, List<? extends ChatMessage> chatMessages, double creativity);
 
   interface ChatMessage {
     String role();

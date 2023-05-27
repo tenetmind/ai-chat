@@ -1,5 +1,6 @@
 package com.tenetmind.app.adapter.in;
 
+import static com.tenetmind.app.adapter.in.MessageController.ChatRequest.toChatCommand;
 import static com.tenetmind.chat.port.in.ChatWithAiUseCase.ChatCommand;
 import static com.tenetmind.chat.port.in.ChatWithAiUseCase.TooManyRequestsException;
 import static org.springframework.http.HttpStatus.*;
@@ -23,13 +24,22 @@ public class MessageController {
       produces = APPLICATION_JSON_VALUE + ";charset=UTF-8")
   @ResponseStatus(OK)
   ChatResponse chatWithAi(@RequestBody ChatRequest request) {
-    var command = ChatCommand.of(request.message);
+    log.info("Received request: {}", request);
+    var command = toChatCommand(request);
     var response = chatWithAiUseCase.chat(command);
     log.info("Sending response message: {}", response);
     return new ChatResponse(response);
   }
 
-  private record ChatRequest(String message) {}
+  record ChatRequest(String message, String model, String creativity) {
+    static ChatCommand toChatCommand(ChatRequest request) {
+      return ChatCommand.builder()
+          .message(request.message)
+          .modelOpt(request.model)
+          .creativityOpt(request.creativity)
+          .build();
+    }
+  }
 
   private record ChatResponse(String message) {}
 

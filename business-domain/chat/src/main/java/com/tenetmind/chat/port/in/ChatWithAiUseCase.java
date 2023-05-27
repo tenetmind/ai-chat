@@ -1,10 +1,11 @@
 package com.tenetmind.chat.port.in;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static lombok.AccessLevel.PRIVATE;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Builder;
 import lombok.Value;
+
+import java.util.Optional;
 
 public interface ChatWithAiUseCase {
 
@@ -12,17 +13,20 @@ public interface ChatWithAiUseCase {
   String chat(ChatCommand command);
 
   @Value
-  @RequiredArgsConstructor(access = PRIVATE)
   class ChatCommand {
     String message;
+    Optional<String> modelOpt;
+    Optional<String> creativityOpt;
 
-    public static ChatCommand of(String message) {
-
+    @Builder
+    private ChatCommand(String message, String modelOpt, String creativityOpt) {
       if (isNullOrEmpty(message)) {
         throw new ValidationException("Chat command message cannot be null or empty");
       }
 
-      return new ChatCommand(message);
+      this.message = message;
+      this.modelOpt = Optional.ofNullable(modelOpt);
+      this.creativityOpt = Optional.ofNullable(creativityOpt);
     }
   }
 
