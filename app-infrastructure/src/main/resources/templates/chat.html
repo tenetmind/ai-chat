@@ -17,9 +17,12 @@
         #inputField {
             position: fixed;
             bottom: 20px;
-            width: 35%;
             min-height: 18px;
             max-height: 400px;
+            width: 35%;
+            max-width: 500px;
+            left: 50%; /* Centralize */
+            transform: translateX(-50%); /* Centralize */
             overflow: hidden;
             font-size: 14px;
             resize: none;
@@ -35,11 +38,14 @@
         }
 
         #chatHistory {
-            height: calc(100% - 100px);
-            overflow-y: auto;
-            width: 35%;
             position: fixed;
             bottom: 90px;
+            height: calc(100% - 100px);
+            width: 35%;
+            max-width: 500px;
+            left: 50%; /* Centralize */
+            transform: translateX(-50%); /* Centralize */
+            overflow-y: auto;
             font-size: 16px;
             font-family: sans-serif;
             line-height: 1.4;
@@ -51,6 +57,12 @@
 
         #chatHistory div {
             padding: 10px 0; /* Add padding to the top and bottom of each message */
+        }
+
+        @media only screen and (max-width: 600px) {
+            #inputField, #chatHistory {
+                width: 80%;
+            }
         }
 
         .user-message {
