@@ -41,10 +41,10 @@
 
         #chatHistory {
             display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: flex-start;
-            overflow: auto;
+            flex-direction: column-reverse;
+            /*justify-content: flex-end;*/
+            /*align-items: flex-start;*/
+            overflow-y: auto;
             position: fixed;
             bottom: 90px;
             height: calc(100% - 100px);
@@ -68,7 +68,13 @@
         }
 
         #chatHistory div {
+            align-self: flex-start;
             padding: 10px 0; /* Add padding to the top and bottom of each message */
+        }
+
+        #messageContainer {
+            display: flex;
+            flex-direction: column;
         }
 
         @media only screen and (max-width: 600px) {
@@ -204,11 +210,11 @@
                         currentLoadingMessage.remove();
                     }
 
-                    $('#chatHistory').append('<div><span class="user-message">' + message + '</span></div>');
+                    $('#messageContainer').append('<div><span class="user-message">' + message + '</span></div>');
                     scrollToBottom();
 
                     currentLoadingMessage = $('<div><span class="machine-message"><span class="dot-1">.</span><span class="dot-2">.</span><span class="dot-3">.</span></span></div>');
-                    $('#chatHistory').append(currentLoadingMessage);
+                    $('#messageContainer').append(currentLoadingMessage);
                     scrollToBottom();
 
                     currentAjaxRequest = $.ajax({
@@ -257,7 +263,7 @@
             });
 
             function scrollToBottom() {
-                $('#chatHistory').scrollTop(0);
+                $('#chatHistory').scrollTop($('#chatHistory')[0].scrollHeight);
             }
 
             // Handle the settings icon click
@@ -300,6 +306,10 @@
             updateSettingsIconPosition();
         });
 
+        $(window).on('load', function() {
+            updateSettingsIconPosition();
+        });
+
         $(document).ready(function () {
             updateSettingsIconPosition();
         });
@@ -310,7 +320,7 @@
             let position = inputField.position();
             let width = inputField.outerWidth();
 
-            let iconPosition = position.left + width - settingsIcon.outerWidth() - 15;
+            let iconPosition = position.left + width - settingsIcon.outerWidth() - 5;
 
             let newStyles = `
             #settingsIcon {
@@ -327,9 +337,11 @@
     <!-- Settings dialog will be dynamically added here -->
 </div>
 <div id="chatHistory">
-    <!-- Chat history will be dynamically added here -->
+    <div id="messageContainer">
+        <!-- Chat history will be dynamically added here -->
+    </div>
 </div>
 <textarea id="inputField" placeholder="Start chatting here"></textarea>
-<i id="settingsIcon" class="material-icons" style="position: fixed; bottom: 50px; cursor: pointer;">more_vert</i>
+<i id="settingsIcon" class="material-icons" style="position: fixed; bottom: 40px; cursor: pointer;">more_vert</i>
 </body>
 </html>
