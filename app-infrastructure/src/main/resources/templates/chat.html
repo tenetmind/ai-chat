@@ -153,7 +153,7 @@
             -webkit-appearance: none;
             width: 100%;
             height: 15px;
-            background: linear-gradient(to right, #eeeeee, #0056b3); /* Update the gradient colors */
+            background: linear-gradient(to right, #eeeeee, #0056b3);
             outline: none;
             opacity: 0.7;
             -webkit-transition: .2s;
@@ -289,18 +289,18 @@
             }
 
             // Handle the settings icon click
-            $('#settingsIcon').click(function (event) {
+            $('#settingsIcon').click(function () {
                 // Create the settings dialog
                 let settingsDialog = `
                     <div >
                         <h4>Model</h4>
                         <div style="display: flex; flex-direction: column; text-align: center;">
                             <div>
-                                <input type="radio" id="model1" name="model" value="1" checked>
+                                <input type="radio" id="model1" name="model" value="1" ${currentModel} === '1' ? 'checked' : ''>
                                 <label for="model1">Model 1</label>
                             </div>
                             <div>
-                                <input type="radio" id="model2" name="model" value="2">
+                                <input type="radio" id="model2" name="model" value="2" ${currentModel} === '2' ? 'checked' : ''>
                                 <label for="model2">Model 2</label>
                             </div>
                         </div>
@@ -318,10 +318,6 @@
 
                 // Add the settings dialog to the container and show it
                 $('#settingsContainer').html(settingsDialog).show();
-
-                // Prevent the document click event from being triggered
-                // when the settingsIcon is clicked
-                // event.stopPropagation();
 
                 // Handle the accept button click
                 $('#acceptButton').click(function () {
@@ -358,15 +354,12 @@
             let settingsIcon = $("#settingsIcon");
             let position = inputField.position();
             let width = inputField.outerWidth();
-
             let iconPosition = position.left + width - settingsIcon.outerWidth() - 5;
-
             let newStyles = `
-            #settingsIcon {
-                left: ${iconPosition}px;
-            }
-        `;
-
+                #settingsIcon {
+                    left: ${iconPosition}px;
+                }
+            `;
             $("#dynamicStyles").append(newStyles);
         }
     </script>
